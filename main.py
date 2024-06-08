@@ -23,22 +23,22 @@ initional=[0,0,0,0]
 ngates=0
 ev.header.printMe()
 
-# for d in dt:
-#     print(d.Introduction)
-#     if d.Introduction:#range(5):
-#        stations.append((d.x,d.y,d.z))
-#        observed_times.append(d.introInX)
-#        initional[0]+=d.x
-#        initional[1]+= d.y
-#        initional[2] += d.z
-#        initional[3] += d.introInX
-#        ngates+=1
+for d in dt:
+     print(d.Introduction)
+     if d.Introduction:#range(5):
+        stations.append((d.x,d.y,d.z))
+        observed_times.append(d.introInX)
+        initional[0]+=d.x
+        initional[1]+= d.y
+        initional[2] += d.z
+        initional[3] += d.introInX
+        ngates+=1
 # for  i in range(3)       :
 #     a=initional[i]/ngates
 #     initional[i]=a
 # initional.append(3)
 #
-# print(stations,observed_times,initional,ngates)
+print(stations,observed_times,initional,ngates)
 #
 #
 #     # stations.append(dt.x,dt.y,dt.z)

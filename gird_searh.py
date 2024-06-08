@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+import event_file_reader as er
 
 
 # Функция для расчета теоретического времени прибытия P-волны в 3D
@@ -53,6 +54,37 @@ observed_times = [theoretical_arrival_time(st, actual_hypocenter) for st in stat
 
 # Параметры для алгоритма
 initial_hypocenter = [0, 0, 0]
+initial_step = 50000 / 3  # Шаг сетки, так что начальная длина ребра - 50000 км
+
+# Запуск поиска по сетке
+final_hypocenter = adaptive_grid_search(initial_hypocenter, initial_step, stations, observed_times)
+
+print("Фактический гипоцентр:", actual_hypocenter)
+print("Оцененный гипоцентр через адаптивный поиск по сетке:", final_hypocenter)
+def load_file_as_byte_array(file_path):
+    with open(file_path, "rb") as file:
+        byte_array = file.read()
+    return byte_array
+f = load_file_as_byte_array("test.event")
+ev = er.try_read(f)
+stations=[]
+dt=ev.header.datchiki
+observed_times=[]
+initional=[0,0,0,0]
+ngates=0
+ev.header.printMe()
+
+for d in dt:
+     print(d.Introduction)
+     if d.Introduction:#range(5):
+        stations.append((d.x,d.y,d.z))
+        observed_times.append(d.introInX)
+        initional[0]+=d.x
+        initional[1]+= d.y
+        initional[2] += d.z
+        initional[3] += d.introInX
+        ngates+=1
+initial_hypocenter=stations[0]
 initial_step = 50000 / 3  # Шаг сетки, так что начальная длина ребра - 50000 км
 
 # Запуск поиска по сетке

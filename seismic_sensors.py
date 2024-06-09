@@ -32,7 +32,8 @@ class SeismicSensorArray:
                 locations.append(A)
                 velocities.append(np.round(datchik.v / 1000, 6))
                 sensor_names.append(datchik.Name)
-                observed_times.append(np.round(datchik.introInX))
+                observed_times.append(np.round(datchik.introInX,6))
+                #print(observed_times)
             #print(datchik.Name,[np.round(datchik.x,6), np.round(datchik.y,6), np.round(datchik.z,6)])
 
             # sensor_names.append(datchik.Name)

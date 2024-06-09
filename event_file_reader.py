@@ -28,6 +28,7 @@ class Datchik:
         self.z = 0
         self.introInX = 0
         self.Name = ""
+        self.v=0
 
 
 class EventType:
@@ -111,6 +112,7 @@ def readGaugeData(header_json):
         gauge.Introduction = d['Introduction']
         gauge.introInX = d['introInX']
         gauge.Name = d['Name']
+        gauge.v=d['v']
         h.datchiki.append(gauge)
     return h
 
@@ -168,3 +170,10 @@ def try_read(db_data):
         return event
     else:
         return None
+def load_file_as_byte_array(file_path):
+    with open(file_path, "rb") as file:
+        byte_array = file.read()
+    return byte_array
+def load_event_from_path(file_path):
+    event=try_read(load_file_as_byte_array(file_path))
+    return event

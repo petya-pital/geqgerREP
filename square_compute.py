@@ -95,6 +95,8 @@ def geiger_from_file_path(file_path,max_iterarions,tolerance,prt=True,ah=True, i
     v = ssa.velocities
     t = ssa.observed_times
     indmin=np.argmin(ssa.observed_times)
+    for i in range(len(ssa.observed_times)):
+        ssa.observed_times[i]-ssa.observed_times[indmin]
     if initial_guess == None:
         initial_guess = [0, ssa.locations[indmin][0], ssa.locations[indmin][1],
                          ssa.locations[indmin][2]]

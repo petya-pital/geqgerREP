@@ -1,5 +1,6 @@
 import numpy as np
 import event_file_reader as er
+
 class SeismicSensorArray:
     def __init__(self, locations, velocities, observed_times, detections,sensor_names=None):
         """
@@ -30,7 +31,7 @@ class SeismicSensorArray:
                 detections.append(datchik.Introduction)
                 A = [np.round(datchik.x, 6), np.round(datchik.y, 6), np.round(datchik.z, 6)]
                 locations.append(A)
-                velocities.append(np.round(datchik.v / 1000, 6))
+                velocities.append(np.round(datchik.v, 6))
                 sensor_names.append(datchik.Name)
                 observed_times.append(np.round(datchik.introInX,6))
                 #print(observed_times)

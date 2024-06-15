@@ -34,8 +34,9 @@ def gird_serch_from_file_path(file_path,m_step=1,prnt=True,ah=True, initial_gues
     ev=er.load_event_from_path(file_path)
     ssa=seismic_sensors.SeismicSensorArray.from_header(ev.header)
     indmin = np.argmin(ssa.observed_times)
-    for i in range(len(ssa.observed_times)):
-        ssa.observed_times[i]-ssa.observed_times[indmin]
+    minot=ssa.observed_times[indmin]
+    ssa.observed_times-=minot
+
     if initial_guess==None:
         # initial_guess = [ssa.observed_times[indmin], ssa.locations[indmin][0], ssa.locations[indmin][1],
         #              ssa.locations[indmin][2]]

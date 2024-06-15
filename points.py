@@ -22,7 +22,7 @@ class FPoint(EPoint):
         self.t=numpy.infty
         self.t=t
     def Tdist(self,other):
-        return np.linalg.norm(numpy.array([self.x,self.y,self.z.self.t])-numpy.array([other.x,other.y,other.z,other.t]))
+        return np.linalg.norm(np.array([self.x,self.y,self.z.self.t])-np.array([other.x,other.y,other.z,other.t]))
 
 
 
@@ -40,5 +40,10 @@ def residual_sum_squares(TestPoint, sensors: seismic_sensors.SeismicSensorArray)
             time = theoretical_time(TestPoint, sensors.locations[i], sensors.velocities[i])
             residuals += (time - sensors.observed_times[i]) ** 2
     return residuals
-
+def residual_sum_squares_c(TestPoint, sensors,velocities):
+    residuals = 0
+    for i in range(len(sensors)):
+        time = theoretical_time(TestPoint,sensors[i], velocities[i])
+        residuals += (time - sensors.observed_times[i]) ** 2
+    return residuals
 

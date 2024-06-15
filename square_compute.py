@@ -2,8 +2,13 @@ import  event_file_reader as er
 import seismic_sensors as ss
 import numpy as np
 from scipy.linalg import lstsq
-
-
+import solve_hypocentr as sh
+import pandas as pd
+import writer
+import points as pt
+def theoretical_time(pointA, pointB, velocity):
+    distance = np.linalg.norm(pointA - pointB)
+    return distance / velocity
 def calculate_travel_time_and_derivatives(x, y, z, x0, y0, z0, v):
     """
     Рассчитывает время прохождения волны и его частные производные
@@ -25,47 +30,18 @@ def calculate_travel_time_and_derivatives(x, y, z, x0, y0, z0, v):
 
 
 def geiger_method(x, y, z, t, v, initial_guess, max_iter, tolerance,alpha=0.0001):
-    # """
-    # Реализация метода Гейгера для определения гипоцентра.
-    # """
-    # t0, x0, y0, z0 = initial_guess
-    # for iteration in range(max_iter):
-    #     A = []
-    #     b = []
-    #     for xi, yi, zi, ti, vi in zip(x, y, z, t, v):
-    #         T, dTdx, dTdy, dTdz = calculate_travel_time_and_derivatives(xi, yi, zi, x0, y0, z0, vi)
-    #         A.append([1, dTdx, dTdy, dTdz])
-    #         b.append(np.round(ti - (t0 + T), 6))
-    #
-    #
-    #     A = np.array(A)
-    #     b = np.array(b)
-    #     delta = lstsq(A, b)[0]
-    #     delta = np.round(delta, 6)
-    #     print('iteration ', iteration, ' from ', max_iter - 1)
-    #     print('old focal: ',initial_guess)
-    #     print('sdvig= ',delta)
-    #     print('norm of shift =',np.linalg.norm(delta),'critical value= ',tolerance)
-    #     print('new focal: ',t0, x0, y0, z0)
-    #     t0 = np.round(t0 + delta[0], 6)
-    #     x0 = np.round(x0 + delta[1], 6)
-    #     y0 = np.round(y0 + delta[2], 6)
-    #     z0 = np.round(z0 + delta[3], 6)
-    #
-    #     # Проверка сходимости
-    #     if np.linalg.norm(delta) < tolerance:
-    #         break
-    #
-    # return t0, x0, y0, z0
+
     t0, x0, y0, z0 = initial_guess
     for iteration in range(max_iter):
+        residuals = 0
         A = []
         b = []
         for xi, yi, zi, ti, vi in zip(x, y, z, t, v):
             T, dTdx, dTdy, dTdz = calculate_travel_time_and_derivatives(xi, yi, zi, x0, y0, z0, vi)
             A.append([1, dTdx, dTdy, dTdz])
             b.append(ti - (t0 + T))
-
+        time = theoretical_time(np.array([x0,y0,z0]), np.array([xi, yi, zi]), vi)
+        residuals += (time - ti) ** 2
         A = np.array(A)
         b = np.array(b)
         ATA = np.dot(A.T, A) + alpha * np.eye(4)  # Регуляризация
@@ -84,10 +60,12 @@ def geiger_method(x, y, z, t, v, initial_guess, max_iter, tolerance,alpha=0.0001
         z0 += delta[3]
         if iteration < 3000 or iteration % 1000 == 0:
             print('new focal: ', t0, x0, y0, z0)
+            print('residuals')
+            print(residuals)
         if np.linalg.norm(delta) < tolerance:
             break
 
-    return np.round([t0, x0, y0, z0], 6)  # Округление только в конце
+    return [t0, x0, y0, z0] # Округление только в конце
 def geiger_from_file_path(file_path,max_iterarions,tolerance,prt=True,ah=True, initial_guess=None):
     ev = er.load_event_from_path(file_path)
     ssa = ss.SeismicSensorArray.from_header(ev.header)
@@ -95,8 +73,8 @@ def geiger_from_file_path(file_path,max_iterarions,tolerance,prt=True,ah=True, i
     v = ssa.velocities
     t = ssa.observed_times
     indmin=np.argmin(ssa.observed_times)
-    for i in range(len(ssa.observed_times)):
-        ssa.observed_times[i]-ssa.observed_times[indmin]
+    minot = ssa.observed_times[indmin]
+    ssa.observed_times -= minot
     if initial_guess == None:
         initial_guess = [0, ssa.locations[indmin][0], ssa.locations[indmin][1],
                          ssa.locations[indmin][2]]
@@ -107,7 +85,58 @@ def geiger_from_file_path(file_path,max_iterarions,tolerance,prt=True,ah=True, i
             actual_hypocenter=[ev.catInfo.x,ev.catInfo.y,ev.catInfo.z]
             print("Фактический гипоцентр:", actual_hypocenter)
     return result
+def gieger_from_problem(problem: sh.Problem,max_iterarions,tolerance,alpha=0000.1,prt=True,ah=True, initial_guess=None):
+    stations=np.array(problem.locations)
+    v=problem.velocities
+    t=np.array(problem.observed_times)
+    indmin=np.argmin(t)
+    minot =t[indmin]
+    t-=minot
+    if initial_guess == None:
+        initial_guess = [0, stations[indmin][0], stations[indmin][1],
+                         stations[indmin][2]]
+    result= geiger_method(stations[:, 0], stations[:, 1], stations[:, 2], t, v, initial_guess,max_iter=max_iterarions,tolerance=tolerance,alpha=alpha)
+    return result
+def massive_calculation_from_file_path(file_path,file_path2,max_iterarions,tolerance,alpha=0.0001):
+    events_data = pd.read_excel(file_path, skiprows=4, engine='openpyxl')
+    list_of_events = [
+        sh.EventDate(
+            date=row['Дата и время UTC+7'],
+            real_coordinates=[row['X'], row['Y'], row['Z']],
+            speed=row['V'],
+            number_of_sensors=row['N датчиков'],
+            arrival_times=row[['intro_1', 'intro_2', 'intro_3', 'intro_4', 'intro_5', 'intro_6', 'intro_7']].tolist()
+        )
+        for index, row in events_data.iterrows()
+    ]
+    data = np.loadtxt(file_path2, dtype=str, encoding='utf-8-sig')
 
+    # Массив с типами датчиков
+    sensor_types = data[:, 0]
+    data[:, 1:4] = np.char.replace(data[:, 1:4], ',', '.')
+    # Массив с координатами
+    coordinates = data[:, 1:4].astype(float)
+    params = [
+        f"метод={'geiger'}",
+        f"максимальное число итераций={max_iterarions}",
+        f"альфа={alpha}",
+        f"точность={tolerance}"
+    ]
+    workbook = writer.create_excel_file(file_path, params)
+    ws = workbook.active
+    #ws.append(['Новые данные', '123', '456', '789', '', '10', '20', '30', '40', '', '0.5'])
+
+    # После окончания работы с файлом его нужно сохранить и можно закрыть
+#    , '', coord[0], coord[1], coord[2], '', r[0], r[1], r[2], r[3]
+    for e in list_of_events:
+        coord=np.array(e.real_coordinates)
+        pr=sh.create_problem(e,coordinates)
+        print(pr)
+        r=gieger_from_problem(pr,max_iterarions,tolerance,alpha=0.0001)
+        print(r)
+        ws.append([e.date, '', coord[0], coord[1], coord[2], '', r[0], r[1], r[2], r[3]])
+    workbook.save('new' + file_path)
+    workbook.close()
 # Вызов функции
 # result = geiger_method(stations[:, 0], stations[:, 1], stations[:, 2], t, v, initial_guess)
 # print("Оцененные значения: время", result[0], ", координаты (", result[1], ", ", result[2], ", ", result[3], ")")

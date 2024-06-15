@@ -46,10 +46,11 @@ def plot_coordinates_from_excel(filepath):
     ax.scatter(calculated_coords[:, 0], calculated_coords[:, 1], calculated_coords[:, 2], c='red',
                label='Calculated Coordinates')
 
-    # Добавление подписей к каждой паре точек
+    # Добавление подписей и линий к каждой паре точек
     for real, calc, label in zip(real_coords, calculated_coords, labels):
         ax.text(real[0], real[1], real[2], label, color='blue')
         ax.text(calc[0], calc[1], calc[2], label, color='red')
+        ax.plot([real[0], calc[0]], [real[1], calc[1]], [real[2], calc[2]], c='gray')
 
     # Настройка графика
     ax.set_xlabel('X Coordinate')
@@ -59,8 +60,6 @@ def plot_coordinates_from_excel(filepath):
 
     # Отображение графика
     plt.show()
-
-
 # Пример вызова функции
 #plot_coordinates_from_excel('имя.xlsx')
 

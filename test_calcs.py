@@ -1,61 +1,90 @@
-import event_file_reader as er
+import  event_file_reader as er
 import seismic_sensors as ss
 import numpy as np
 from scipy.linalg import lstsq
+import solve_hypocentr as sh
+import pandas as pd
+import writer
+import points as pt
+import grid_straightforward_search as gss
+import square_compute as sc
+def geiger_massive_calculation_from_file_path(file_path,file_path2,max_iterarions,tolerance,alpha=0.0001):
+    events_data = pd.read_excel(file_path, skiprows=4, engine='openpyxl')
+    list_of_events = [
+        sh.EventDate(
+            date=row['Дата и время UTC+7'],
+            real_coordinates=[row['X'], row['Y'], row['Z']],
+            speed=row['V'],
+            number_of_sensors=row['N датчиков'],
+            arrival_times=row[['intro_1', 'intro_2', 'intro_3', 'intro_4', 'intro_5', 'intro_6', 'intro_7']].tolist()
+        )
+        for index, row in events_data.iterrows()
+    ]
+    data = np.loadtxt(file_path2, dtype=str, encoding='utf-8-sig')
 
-def calculate_travel_time_and_derivatives(x, y, z, x0, y0, z0, v):
-    dx = x0 - x
-    dy = y0 - y
-    dz = z0 - z
-    dist = np.sqrt(dx ** 2 + dy ** 2 + dz ** 2)
-    epsilon = 1e-8  # Уменьшение значения epsilon
-    dist = np.fmax(dist, epsilon)
+    # Массив с типами датчиков
+    sensor_types = data[:, 0]
+    data[:, 1:4] = np.char.replace(data[:, 1:4], ',', '.')
+    # Массив с координатами
+    coordinates = data[:, 1:4].astype(float)
+    params = [
+        f"метод={'geiger'}",
+        f"максимальное число итераций={max_iterarions}",
+        f"альфа={alpha}",
+        f"точность={tolerance}"
+    ]
+    workbook = writer.create_excel_file(file_path, params)
+    ws = workbook.active
+    #ws.append(['Новые данные', '123', '456', '789', '', '10', '20', '30', '40', '', '0.5'])
 
-    time = dist / v
-    dtdx = dx / (v * dist)
-    dtdy = dy / (v * dist)
-    dtdz = dz / (v * dist)
-    return time, dtdx, dtdy, dtdz
+    # После окончания работы с файлом его нужно сохранить и можно закрыть
+#    , '', coord[0], coord[1], coord[2], '', r[0], r[1], r[2], r[3]
+    for e in list_of_events:
+        coord=np.array(e.real_coordinates)
+        pr=sh.create_problem(e,coordinates)
+        print(pr)
+        r=sc.gieger_from_problem(pr,max_iterarions,tolerance,alpha=0.0001)
+        print(r)
+        ws.append([e.date, '', coord[0], coord[1], coord[2], '', r[0], r[1], r[2], r[3]])
+    workbook.save('new' + file_path)
+    workbook.close()
+def gss_massive_calculation_from_file_path(file_path,file_path2,scale=2,num=10):
+    events_data = pd.read_excel(file_path, skiprows=4, engine='openpyxl')
+    list_of_events = [
+        sh.EventDate(
+            date=row['Дата и время UTC+7'],
+            real_coordinates=[row['X'], row['Y'], row['Z']],
+            speed=row['V'],
+            number_of_sensors=row['N датчиков'],
+            arrival_times=row[['intro_1', 'intro_2', 'intro_3', 'intro_4', 'intro_5', 'intro_6', 'intro_7']].tolist()
+        )
+        for index, row in events_data.iterrows()
+    ]
+    data = np.loadtxt(file_path2, dtype=str, encoding='utf-8-sig')
 
-def geiger_method(x, y, z, t, v, initial_guess, max_iter, tolerance, alpha=1e-6):
-    t0, x0, y0, z0 = initial_guess
-    for iteration in range(max_iter):
-        A = []
-        b = []
-        for xi, yi, zi, ti, vi in zip(x, y, z, t, v):
-            T, dTdx, dTdy, dTdz = calculate_travel_time_and_derivatives(xi, yi, zi, x0, y0, z0, vi)
-            A.append([1, dTdx, dTdy, dTdz])
-            b.append(ti - (t0 + T))
+    # Массив с типами датчиков
+    sensor_types = data[:, 0]
+    data[:, 1:4] = np.char.replace(data[:, 1:4], ',', '.')
+    # Массив с координатами
+    coordinates = data[:, 1:4].astype(float)
+    params = [
+        f"метод={'gird_straigthtforward'}",
+        f"число клеток={num}",
+        f"параметр масштабирования={scale}"
+    ]
+    workbook = writer.create_excel_file(file_path, params)
+    ws = workbook.active
+    #ws.append(['Новые данные', '123', '456', '789', '', '10', '20', '30', '40', '', '0.5'])
 
-        A = np.array(A)
-        b = np.array(b)
-        ATA = np.dot(A.T, A) + alpha * np.eye(4)  # Регуляризация
-        ATb = np.dot(A.T, b)
-        delta = lstsq(ATA, ATb)[0]
-        t0 += delta[0]
-        x0 += delta[1]
-        y0 += delta[2]
-        z0 += delta[3]
-
-        if np.linalg.norm(delta) < tolerance:
-            break
-
-    return np.round([t0, x0, y0, z0], 6)  # Округление только в конце
-
-def geiger_from_file_path(file_path, max_iterations, tolerance, prt=True, ah=True):
-    ev = er.load_event_from_path(file_path)
-    ssa = ss.SeismicSensorArray.from_header(ev.header)
-    stations = np.array(ssa.locations)
-    v = ssa.velocities
-    t = ssa.observed_times
-    indmin = np.argmin(ssa.observed_times)
-    initial_guess = [ssa.observed_times[indmin], *ssa.locations[indmin]]
-
-    result = geiger_method(stations[:, 0], stations[:, 1], stations[:, 2], t, v, initial_guess, max_iter=max_iterations, tolerance=tolerance)
-    if prt:
-        print("Оцененные значения: время", result[0], ", координаты (", result[1], ", ", result[2], ", ", result[3], ")")
-        if ah:
-            actual_hypocenter = [ev.catInfo.x, ev.catInfo.y, ev.catInfo.z]
-            print("Фактический гипоцентр:", actual_hypocenter)
-    return result
-geiger_from_file_path('test.event',40,0.00001,True)
+    # После окончания работы с файлом его нужно сохранить и можно закрыть
+#    , '', coord[0], coord[1], coord[2], '', r[0], r[1], r[2], r[3]
+    for e in list_of_events:
+        coord=np.array(e.real_coordinates)
+        pr=sh.create_problem(e,coordinates)
+        #print(pr)
+        l=gss.HypocenterLocator(pr.locations,pr.observed_times,pr.velocities,scale_factor=2, num_cells=10)
+        hypocenter, error = l.find_hypocenter()
+        print("Estimated hypocenter:", hypocenter, "with error:", error)
+        ws.append([e.date, '', coord[0], coord[1], coord[2], '', '',hypocenter[0], hypocenter[0], hypocenter[0], '', '',error])
+    workbook.save('new' + file_path)
+    workbook.close()

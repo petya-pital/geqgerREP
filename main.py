@@ -8,7 +8,7 @@ import  writer
 import seismic_sensors as ss
 import  visual
 import test_calcs as tc
-
+import grid_straightforward_search as gss
 
 # filepath='Antonovskaya_joint_test.xlsx'
 # filepath2='Antonovskaya_gauges.txt'
@@ -74,6 +74,9 @@ def main():
 
 if __name__ == "__main__":
     ev=er.load_event_from_path('test.event')
-
+    f=gss.find_hypo_from_event(ev)
+    print("Estimated hypocenter:", f[0], "with error:", f[1])
+    sc.geiger_from_file_path('test.event',10000,0.01)
+    gs.gird_serch_from_file_path('test.event')
     # main()
 

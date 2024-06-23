@@ -26,32 +26,36 @@ def show_intro():
     print( 'print "exit" for exit, "help" for help ')
 def show_help():
     print('now this is no help')
-def evenfilechoise():
-    print("Выберите метод 1-гейгер, 2-сетка, 3-JHD")
+def evenfilechoise(filepath1):
+    print("Выберите метод 1-гейгер, 21-сеткаSF,22-сеткаAdaptive 3-JHD")
     c=int(input())
     if c==3:
         print("в разработке, возвращаем к началу")
         evenfilechoise()
-    elif c==2:
+    elif c==21:
         print('метод сетка.')
         print("число узлов?")
         num_cells=int(input())
         print('значение масштабирующего коэффициента?')
         scale_factor=int(input())
+    elif c=22:
+        
     elif c==1:
         print('метод гейгер.')
         print("максимальное число итераций?")
         m_iter=int(input())
         print('целевой сдвиг ?')
         pogr=float(input())
+        sc.geiger_from_file_path(filepath1, m_iter, pogr)
     else:
         print('invalid command,try again')
         evenfilechoise()
 def main():
+    show_intro()
+    print("выберите способ ввода:")
+    print("1. из файла типа event \n2. Из exel файлов\nprint \"-1\" for exit, \"0\" for help")
     while True:
-            show_intro()
-            print("выберите способ ввода:")
-            print("1. из файла типа event \n2. Из exel файлов\nprint \"-1\" for exit, \"0\" for help")
+
             choice=int(input())
             if choice == 0:
                 show_help()
@@ -62,7 +66,7 @@ def main():
                 print("Вы выбрали ввод данных из файла типа event.")
                 print("введите имя файла")
                 filepath1 = input()
-                evenfilechoise()
+                evenfilechoise(filepath1)
             elif choice == 1:
                 print("Вы выбрали ввод данных из двух файлов типа exel and txt")
                 print("введите имя txt файла с координатами датчиков")
@@ -73,10 +77,11 @@ def main():
         # функция ввода данных
 
 if __name__ == "__main__":
-    ev=er.load_event_from_path('test.event')
-    f=gss.find_hypo_from_event(ev)
-    print("Estimated hypocenter:", f[0], "with error:", f[1])
-    sc.geiger_from_file_path('test.event',10000,0.01)
-    gs.gird_serch_from_file_path('test.event')
-    # main()
+
+    # ev=er.load_event_from_path('test.event')
+    # f=gss.find_hypo_from_event(ev)
+    # print("Estimated hypocenter:", f[0], "with error:", f[1])
+    # sc.geiger_from_file_path('test.event',10000,0.01)
+    # gs.gird_serch_from_file_path('test.event')
+    main()
 

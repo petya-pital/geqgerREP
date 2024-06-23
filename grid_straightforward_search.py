@@ -37,6 +37,7 @@ class HypocenterLocator:
         for point in self.grid:
             times = np.array([self.theoretical_time(point, sensor, velocity) for sensor, velocity in zip(self.sensor_coords, self.velocities)])
             valid_indices = ~np.isnan(self.detection_times)
+
             observed_times = self.detection_times[valid_indices]
             computed_times = times[valid_indices]
             source_time = np.mean(observed_times - computed_times)
@@ -51,24 +52,25 @@ class HypocenterLocator:
         errors = self.calculate_errors()
         best_index = np.argmin(errors)
         return self.grid[best_index], errors[best_index]
-def find_hypo_from_event(ev:er.Event):
+def find_hypo_from_event(ev:er.Event,s_factor=2, n_cells=10):
     ssa = seismic_sensors.SeismicSensorArray.from_header(ev.header)
-    indmin = np.argmin(ssa.observed_times)
-    minot = ssa.observed_times[indmin]
-    ssa.observed_times -= minot
+    # indmin = np.argmin(ssa.observed_times)
+    # minot = ssa.observed_times[indmin]
+    # ssa.observed_times -= minot
     coords = np.array(ssa.locations)
     d_times=np.array(ssa.observed_times)
     velocities=np.array(ssa.velocities)
-    locator = HypocenterLocator(sensor_coords, detection_times, velocities)
+    locator = HypocenterLocator(coords, d_times, velocities, scale_factor=s_factor, num_cells=n_cells)
     result=locator.find_hypocenter()
     return result
 # Пример использования класса
-sensor_coords = np.array([[0, 0, 0], [1, 0, 0], [0, 1, 0], [0, 0, 1], [2, 2, 2]])
-detection_times = [0.5, None, 0.7, 0.2, 1.0]
-velocities = np.array([5000, 6000, 5000, 5500, 5300])  # Разные скорости для каждого датчика
-
-locator = HypocenterLocator(sensor_coords, detection_times, velocities)
-hypocenter, error = locator.find_hypocenter()
-print("Estimated hypocenter:", hypocenter, "with error:", error)
-ev=er.load_event_from_path('test.event')
-print(find_hypo_from_event(ev))
+# sensor_coords = np.array([[0, 0, 0], [1, 0, 0], [0, 1, 0], [0, 0, 1], [2, 2, 2]])
+# detection_times = [0.5, None, 0.7, 0.2, 1.0]
+# velocities = np.array([5000, 6000, 5000, 5500, 5300])  # Разные скорости для каждого датчика
+#
+# locator = HypocenterLocator(sensor_coords, detection_times, velocities)
+# hypocenter, error = locator.find_hypocenter()
+# print("Estimated hypocenter:", hypocenter, "with error:", error)
+# ev=er.load_event_from_path('test.event')
+# f=find_hypo_from_event(ev,2,40)
+# print("Estimated hypocenter:",f[0],"with error:", f[1])

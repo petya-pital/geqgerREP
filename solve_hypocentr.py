@@ -87,16 +87,16 @@ def find_hypocenter(x, y, z, t, v, initial_guess):
     result = minimize(objective_function, initial_guess, args=(x, y, z, t, v),
                       method='BFGS', options={'disp': True})
     return result.x
-ev=er.load_event_from_path("test.event")
-ssa=seismic_sensors.SeismicSensorArray.from_header(ev.header)
-# Пример данных: координаты станций, времена прихода и скорости распространения
-
-stations=np.array(ssa.locations)
-v=ssa.velocities
-t=ssa.observed_times
-# Начальное предположение о времени и местоположении гипоцентра
-initial_guess = [0, 0,0,0]  # t0, x0, y0, z0
-
-# Вызов функции для поиска гипоцентра
-hypocenter = find_hypocenter(stations[:, 0], stations[:, 1], stations[:, 2], t, v, initial_guess)
-print(f"Оценка гипоцентра: время {hypocenter[0]}, координаты ({hypocenter[1]}, {hypocenter[2]}, {hypocenter[3]})")
+# ev=er.load_event_from_path("test.event")
+# ssa=seismic_sensors.SeismicSensorArray.from_header(ev.header)
+# # Пример данных: координаты станций, времена прихода и скорости распространения
+#
+# stations=np.array(ssa.locations)
+# v=ssa.velocities
+# t=ssa.observed_times
+# # Начальное предположение о времени и местоположении гипоцентра
+# initial_guess = [0, 0,0,0]  # t0, x0, y0, z0
+#
+# # Вызов функции для поиска гипоцентра
+# hypocenter = find_hypocenter(stations[:, 0], stations[:, 1], stations[:, 2], t, v, initial_guess)
+# print(f"Оценка гипоцентра: время {hypocenter[0]}, координаты ({hypocenter[1]}, {hypocenter[2]}, {hypocenter[3]})")

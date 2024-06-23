@@ -29,11 +29,11 @@ class SeismicSensorArray:
         for datchik in header.datchiki:
             if datchik.Introduction or d:
                 detections.append(datchik.Introduction)
-                A = [np.round(datchik.x, 6), np.round(datchik.y, 6), np.round(datchik.z, 6)]
+                A = [datchik.x, datchik.y, datchik.z]
                 locations.append(A)
-                velocities.append(np.round(datchik.v, 6))
+                velocities.append(datchik.v)
                 sensor_names.append(datchik.Name)
-                observed_times.append(np.round(datchik.introInX,6))
+                observed_times.append(datchik.introInX)
                 #print(observed_times)
             #print(datchik.Name,[np.round(datchik.x,6), np.round(datchik.y,6), np.round(datchik.z,6)])
 

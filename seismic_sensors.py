@@ -43,6 +43,9 @@ class SeismicSensorArray:
             # else:
             #     observed_times.append(np.inf)
         return cls(locations, velocities, observed_times, detections, sensor_names)
+    def from_event_header(ev:er.Event):
+        hd=ev.header
+        return hd.from_header()
     def from_file_path(file_path):
         ev=er.load_event_from_path()
         hd=ev.header

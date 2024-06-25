@@ -1,14 +1,14 @@
 import numpy as np
 from scipy.optimize import minimize
 import event_file_reader as er
-import square_compute as sc
+#import square_compute as sc
 import gird_searh
 import seismic_sensors
 import points
 import pandas as pd
 import numpy as  np
 
-import square_compute
+#import square_compute
 
 class Problem:
     def __init__(self, locations, velocities, observed_times, real_hypocenter_location):
@@ -55,20 +55,44 @@ class EventDate:
                 f"speed={self.speed}, number_of_sensors={self.number_of_sensors}, "
                 f"arrival_times={self.arrival_times})")
 
-# Загрузка данных из Excel файла, пропуская первые 4 строки с метаданными
-events_data = pd.read_excel('Antonovskaya_joint_test.xlsx', skiprows=4, engine='openpyxl')
+def  create_list_event_date_from_exel(filepath):
+    events_data = pd.read_excel(filepath, skiprows=4, engine='openpyxl')
+    list_of_events = [
+        EventDate(
+            date=row['Дата и время UTC+7'],
+            real_coordinates=[row['X'], row['Y'], row['Z']],
+            speed=row['V'],
+            number_of_sensors=row['N датчиков'],
+            arrival_times=row[['intro_1', 'intro_2', 'intro_3', 'intro_4', 'intro_5', 'intro_6', 'intro_7']].tolist()
+        )
+        for index, row in events_data.iterrows()
+    ]
+    print(list_of_events)
+    return list_of_events
 
+def create_location(filepath):
+    data = np.loadtxt(filepath, dtype=str, encoding='utf-8-sig')
+
+    # Массив с типами датчиков
+    sensor_types = data[:, 0]
+    data[:, 1:4] = np.char.replace(data[:, 1:4], ',', '.')
+    # Массив с координатами
+    coordinates = data[:, 1:4].astype(float)
+
+# Загрузка данных из Excel файла, пропуская первые 4 строки с метаданными
+def create_list_of_problem_from_file(filepath1,filepath2):
+    edl=create_list_event_date_from_exel(filepath1)
+    l=create_location(filepath2)
+    list_of_problem = []
+    for ed in edl:
+        list_of_problem.append(create_problem(ed,l))
+
+
+    result=list_of_problem
+    print(result)
+    return result
 # Создание списка объектов EventDate
-list_of_events = [
-    EventDate(
-        date=row['Дата и время UTC+7'],
-        real_coordinates=[row['X'], row['Y'], row['Z']],
-        speed=row['V'],
-        number_of_sensors=row['N датчиков'],
-        arrival_times=row[['intro_1', 'intro_2', 'intro_3', 'intro_4', 'intro_5', 'intro_6', 'intro_7']].tolist()
-    )
-    for index, row in events_data.iterrows()
-]
+
 def calculate_travel_time(x, y, z, x0, y0, z0, v):
     """Рассчитывает время прохождения волны от гипоцентра до станции."""
     return np.sqrt((x - x0)**2 + (y - y0)**2 + (z - z0)**2) / v
@@ -100,3 +124,12 @@ def find_hypocenter(x, y, z, t, v, initial_guess):
 # # Вызов функции для поиска гипоцентра
 # hypocenter = find_hypocenter(stations[:, 0], stations[:, 1], stations[:, 2], t, v, initial_guess)
 # print(f"Оценка гипоцентра: время {hypocenter[0]}, координаты ({hypocenter[1]}, {hypocenter[2]}, {hypocenter[3]})")
+# filepath='Antonovskaya_joint_test.xlsx'
+# filepath2='Antonovskaya_gauges.txt'
+# filepath3='newAntonovskaya_joint_test.xlsx'
+# # create_problem_from_file(filepath,filepath2)
+# l=create_location(filepath2)
+# led=create_list_event_date_from_exel(filepath)
+# create_problem(led[0],l)
+#create_list_of_problem_from_file(filepath,filepath2)
+#sc.massive_calculation_from_file_path(filepath,filepath2,1000,0.1)

@@ -52,6 +52,27 @@ def gird_serch_from_file_path(file_path,m_step=1,prnt=True,ah=True, initial_gues
             actual_hypocenter=[ev.catInfo.x,ev.catInfo.y,ev.catInfo.z]
             print("Фактический гипоцентр:", actual_hypocenter)
     return(result)
+def gird_serch_from_event(ev:er.Event,m_step=1,prnt=True,ah=True, initial_guess=None,istep=50000):
+    ssa=seismic_sensors.SeismicSensorArray.from_header(ev.header)
+    indmin = np.argmin(ssa.observed_times)
+    minot=ssa.observed_times[indmin]
+    ssa.observed_times-=minot
+
+    if initial_guess==None:
+        # initial_guess = [ssa.observed_times[indmin], ssa.locations[indmin][0], ssa.locations[indmin][1],
+        #              ssa.locations[indmin][2]]
+        initial_guess = [ssa.observed_times[indmin], ssa.locations[indmin][0], ssa.locations[indmin][1],
+                         ssa.locations[indmin][2]]
+    print(m_step)
+    result=adaptive_grid_search(ssa, min_step=m_step, initial_hypocenter=[ssa.locations[indmin][0],ssa.locations[indmin][1],
+                                                                          ssa.locations[indmin][2]],initial_step=istep)
+    if prnt:
+        print('min_step=',m_step)
+        print("Оцененный гипоцентр через адаптивный поиск по сетке:", result)
+        if ah:
+            actual_hypocenter=[ev.catInfo.x,ev.catInfo.y,ev.catInfo.z]
+            print("Фактический гипоцентр:", actual_hypocenter)
+    return(result)
 
 
 # ev=er.load_event_from_path('test.event')

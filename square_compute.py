@@ -29,7 +29,7 @@ def calculate_travel_time_and_derivatives(x, y, z, x0, y0, z0, v):
 
 
 
-def geiger_method(x, y, z, t, v, initial_guess, max_iter, tolerance,alpha=0.0001):
+def geiger_method(x, y, z, t, v, initial_guess, max_iter, tolerance,alpha=0.0001,prt=True):
 
     t0, x0, y0, z0 = initial_guess
     for iteration in range(max_iter):
@@ -47,7 +47,7 @@ def geiger_method(x, y, z, t, v, initial_guess, max_iter, tolerance,alpha=0.0001
         ATA = np.dot(A.T, A) + alpha * np.eye(4)  # Регуляризация
         ATb = np.dot(A.T, b)
         delta = lstsq(ATA, ATb)[0]
-        if iteration<3000 or iteration%1000==0:
+        if (iteration<3000 or iteration%1000==0) and (prt):
             print('iteration ', iteration, ' from ', max_iter - 1)
             print('old focal: ', initial_guess)
             print('sdvig= ', delta)
@@ -58,7 +58,7 @@ def geiger_method(x, y, z, t, v, initial_guess, max_iter, tolerance,alpha=0.0001
         x0 += delta[1]
         y0 += delta[2]
         z0 += delta[3]
-        if iteration < 3000 or iteration % 1000 == 0:
+        if (iteration < 3000 or iteration % 1000 == 0) and prt:
             print('new focal: ', t0, x0, y0, z0)
             print('residuals')
             print(residuals)
@@ -95,7 +95,7 @@ def gieger_from_problem(problem: sh.Problem,max_iterarions,tolerance,alpha=0000.
     if initial_guess == None:
         initial_guess = [0, stations[indmin][0], stations[indmin][1],
                          stations[indmin][2]]
-    result= geiger_method(stations[:, 0], stations[:, 1], stations[:, 2], t, v, initial_guess,max_iter=max_iterarions,tolerance=tolerance,alpha=alpha)
+    result= geiger_method(stations[:, 0], stations[:, 1], stations[:, 2], t, v, initial_guess,max_iter=max_iterarions,tolerance=tolerance,alpha=alpha,prt=prt)
     return result
 def massive_calculation_from_file_path(file_path,file_path2,max_iterarions,tolerance,alpha=0.0001):
     events_data = pd.read_excel(file_path, skiprows=4, engine='openpyxl')

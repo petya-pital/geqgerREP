@@ -62,6 +62,9 @@ def find_hypo_from_event(ev:er.Event,s_factor=2, n_cells=10):
     velocities=np.array(ssa.velocities)
     locator = HypocenterLocator(coords, d_times, velocities, scale_factor=s_factor, num_cells=n_cells)
     result=locator.find_hypocenter()
+    hypocenter, error = result
+    print(result)
+    result=[error,hypocenter[0],hypocenter[1],hypocenter[2]]
     return result
 # Пример использования класса
 # sensor_coords = np.array([[0, 0, 0], [1, 0, 0], [0, 1, 0], [0, 0, 1], [2, 2, 2]])

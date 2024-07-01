@@ -1,4 +1,5 @@
-import numpy as np
+
+#ЭТО КОСТЫЛЬ
 import  solve_hypocentr
 import pandas as pd
 import numpy as  np

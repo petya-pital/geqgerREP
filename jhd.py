@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import solve_hypocentr as sc
+
 
 def theoretical_time(pointA, pointB, velocity):
     distance = np.linalg.norm(pointA - pointB)
@@ -20,30 +20,25 @@ def calculate_partial_derivatives(x, y, z, x0, y0, z0, v):
     dtdz = dz / (v * dist)
     return np.round(dtdx, 6), np.round(dtdy, 6), np.round(dtdz, 6)
 
-class Station:
-    def __init__(self, x, y, z, name=None, correction=0):
-        self.x = x
-        self.y = y
-        self.z = z
-        self.name = name
-        self.correction = correction
 
 
-class JHD_data():
-    def __init__(self,Sensors):
-        self.sensors=Sensors
-        self.numS=len(Sensors)
-        self.events=[]
-        self.numE=len(self.events)
-    def add_event(self,event:sc.EventDate):
-        self.events.append(event)
-        self.numE+=self.numE
-    def get_observed_times(self):
-        observed_times=[]
-        for s in self.sensors
+
+# class JHD_data():
+#     def __init__(self,Sensors):
+#         self.sensors=Sensors
+#         self.numS=len(Sensors)
+#         self.events=[]
+#         self.numE=len(self.events)
+#     def add_event(self,event:sc.EventDate):
+#         self.events.append(event)
+#         self.numE+=self.numE
+#     # def get_observed_times(self):
+#     #     # observed_times=[]
+#     #     # for s in self.sensors
 
 # Функция для создания матрицы весов (п
 def create_weight_matrix(times):
+    times = np.asarray(times).flatten()  # Преобразование в одномерный массив
     weights = np.where(times == -1, 0, 1)
     return np.diag(weights)
 # Функция для красивого вывода уравнений типа 3
@@ -62,21 +57,22 @@ def create_equations_type_3(observed_times, initial_estimates, num_events, num_s
     equations = []
 
     for j in range(num_events):
+        # print(f"observed_times[{j}] = {observed_times[j]}")  # Добавьте эту строку для отладки
         W_j = create_weight_matrix(observed_times[j])
         A_j = np.zeros((num_stations, 4))
         r_j = np.zeros(num_stations)
         t0, x0, y0, z0 = initial_estimates[j]
-        print(x0, y0, z0)
+        # print(x0, y0, z0)
         for i in range(num_stations):
             x, y, z = stations[i].x, stations[i].y, stations[i].z
-            print(x,y,z)
+            # print(x,y,z)
             partials = calculate_partial_derivatives(x, y, z, x0, y0, z0, v=3000)
-            print(partials)
+            # print(partials)
             A_j[i, :] = [1, partials[0], partials[1], partials[2]]
-
-            r_j[i] = observed_times[j, i] - (initial_estimates[j, 0] + stations[i].correction)
+            r_j[i] = observed_times[j][i] - (initial_estimates[j][0] + stations[i].correction)
+            # r_j[i] = observed_times[j, i] - (initial_estimates[j, 0] + stations[i].correction)
             r_j[i] = np.round(r_j[i], 6)
-        print(A_j)
+        # print(A_j)
         equations.append((W_j, A_j, r_j))
     return equations
 
@@ -180,54 +176,54 @@ def plot_comparison_all(real_coords, computed_coords):
     ax.set_zlabel('Z координата')
     ax.legend()
     plt.show()
-num_events = 3
-num_stations = 2
-observed_times = np.array([
-    [10.0, 12.0],
-    [14.0, 16.0],
-    [18.0, 20.0]
-])
-initial_estimates = np.array([
-    [0, 0,0, 0],
-    [0, 0, 0, 0],
-    [0, 0, 0, 0]
-])
-st1 = Station(33, 433, 335, correction=0)
-st2 = Station(6377, 533, 47, correction=0)
-stations = [st1, st2]
-equations = create_equations_type_3(observed_times, initial_estimates, num_events, num_stations, stations)
-delta_X, delta_S = solve_joint_hypocenter(equations, num_events, num_stations)
-
-print("Delta X:\n", delta_X)
-print("Delta S:\n", delta_S)
-
-
-print(calculate_partial_derivatives(1.0 ,33.0 ,3.0, 3 ,4, 5, 3000))
-num_events = 3
-delta_X = np.array([
-    [0.1, 1.1, 2.1, 3.1],
-    [0.2, 4.1, 5.1, 6.1],
-    [0.3, 7.1, 8.1, 9.1]
-])
-real_coords = np.array([
-    [1, 2, 3],
-    [4, 5, 6],
-    [7, 8, 9]
-])
-
-# Получение фокальных параметров
-focal_parameters = get_focal_parameters(delta_X, num_events)
-print_focal_parameters(focal_parameters)
-
-# Получение координат без времени
-coordinates_without_time = get_coordinates_without_time(focal_parameters)
-print("Координаты без времени:")
-print(coordinates_without_time)
-
-# Сравнение реальных и вычисленных координат
-compare_real_and_computed(real_coords, coordinates_without_time)
-
-# Отрисовка пар реальных и вычисленных координат
-plot_comparison(real_coords, coordinates_without_time)
-# Отрисовка пар реальных и вычисленных координат
-plot_comparison_all(real_coords, coordinates_without_time)
+# num_events = 3
+# num_stations = 2
+# observed_times = np.array([
+#     [10.0, 12.0],
+#     [14.0, 16.0],
+#     [18.0, 20.0]
+# ])
+# initial_estimates = np.array([
+#     [0, 0,0, 0],
+#     [0, 0, 0, 0],
+#     [0, 0, 0, 0]
+# ])
+# st1 = Station(33, 433, 335, correction=0)
+# st2 = Station(6377, 533, 47, correction=0)
+# stations = [st1, st2]
+# equations = create_equations_type_3(observed_times, initial_estimates, num_events, num_stations, stations)
+# delta_X, delta_S = solve_joint_hypocenter(equations, num_events, num_stations)
+#
+# print("Delta X:\n", delta_X)
+# print("Delta S:\n", delta_S)
+#
+#
+# print(calculate_partial_derivatives(1.0 ,33.0 ,3.0, 3 ,4, 5, 3000))
+# num_events = 3
+# delta_X = np.array([
+#     [0.1, 1.1, 2.1, 3.1],
+#     [0.2, 4.1, 5.1, 6.1],
+#     [0.3, 7.1, 8.1, 9.1]
+# ])
+# real_coords = np.array([
+#     [1, 2, 3],
+#     [4, 5, 6],
+#     [7, 8, 9]
+# ])
+#
+# # Получение фокальных параметров
+# focal_parameters = get_focal_parameters(delta_X, num_events)
+# print_focal_parameters(focal_parameters)
+#
+# # Получение координат без времени
+# coordinates_without_time = get_coordinates_without_time(focal_parameters)
+# print("Координаты без времени:")
+# print(coordinates_without_time)
+#
+# # Сравнение реальных и вычисленных координат
+# compare_real_and_computed(real_coords, coordinates_without_time)
+#
+# # Отрисовка пар реальных и вычисленных координат
+# plot_comparison(real_coords, coordinates_without_time)
+# # Отрисовка пар реальных и вычисленных координат
+# plot_comparison_all(real_coords, coordinates_without_time)

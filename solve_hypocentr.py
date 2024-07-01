@@ -47,12 +47,12 @@ class EventDate:
         self.date = date
         self.real_coordinates = real_coordinates
         self.speed = speed
-        self.number_of_sensors = number_of_sensors
+        # self.number_of_sensors = number_of_sensors
         self.arrival_times = arrival_times
 
     def __repr__(self):
         return (f"EventDate(date={self.date}, real_coordinates={self.real_coordinates}, "
-                f"speed={self.speed}, number_of_sensors={self.number_of_sensors}, "
+                f"speed={self.speed} "
                 f"arrival_times={self.arrival_times})")
 
 def  create_list_event_date_from_exel(filepath):
@@ -62,7 +62,7 @@ def  create_list_event_date_from_exel(filepath):
             date=row['Дата и время UTC+7'],
             real_coordinates=[row['X'], row['Y'], row['Z']],
             speed=row['V'],
-            number_of_sensors=row['N датчиков'],
+            # number_of_sensors=row['N датчиков'],
             arrival_times=row[['intro_1', 'intro_2', 'intro_3', 'intro_4', 'intro_5', 'intro_6', 'intro_7']].tolist()
         )
         for index, row in events_data.iterrows()

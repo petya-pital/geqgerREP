@@ -196,7 +196,7 @@ def plot_comparison_all(real_coords, computed_coords):
 #
 # print("Delta X:\n", delta_X)
 # print("Delta S:\n", delta_S)
-#
+
 #
 # print(calculate_partial_derivatives(1.0 ,33.0 ,3.0, 3 ,4, 5, 3000))
 # num_events = 3

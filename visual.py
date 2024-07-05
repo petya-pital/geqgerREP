@@ -95,7 +95,51 @@ def plot_hypocenter(sensor_locations, real_hypocenter, calculated_hypocenter):
 
     plt.show()
 
+def plot_comparison(real_coords, computed_coords):
+    real_coords = np.array(real_coords)
+    computed_coords = np.array(computed_coords)
 
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+
+    # Реальные координаты
+    ax.scatter(real_coords[:, 0], real_coords[:, 1], real_coords[:, 2], c='b', marker='o', label='Реальные координаты')
+    # Вычисленные координаты
+    ax.scatter(computed_coords[:, 0], computed_coords[:, 1], computed_coords[:, 2], c='r', marker='^', label='Вычисленные координаты')
+
+    for i in range(len(real_coords)):
+        ax.plot([real_coords[i, 0], computed_coords[i, 0]],
+                [real_coords[i, 1], computed_coords[i, 1]],
+                [real_coords[i, 2], computed_coords[i, 2]], 'k--')
+
+    ax.set_xlabel('X координата')
+    ax.set_ylabel('Y координата')
+    ax.set_zlabel('Z координата')
+    ax.legend()
+    plt.show()
+def plot_comparison_all(real_coords, computed_coords):
+    real_coords = np.array(real_coords)
+    computed_coords = np.array(computed_coords)
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+
+    # Реальные координаты
+    ax.scatter(real_coords[:, 0], real_coords[:, 1], real_coords[:, 2], c='b', marker='o', label='Реальные координаты')
+    # Вычисленные координаты
+    ax.scatter(computed_coords[:, 0], computed_coords[:, 1], computed_coords[:, 2], c='r', marker='^', label='Вычисленные координаты')
+
+    # Соединение пар реальных и вычисленных координат
+    for i in range(len(real_coords)):
+        ax.plot([real_coords[i, 0], computed_coords[i, 0]],
+                [real_coords[i, 1], computed_coords[i, 1]],
+                [real_coords[i, 2], computed_coords[i, 2]], 'k--')
+
+    ax.set_xlabel('X координата')
+    ax.set_ylabel('Y координата')
+    ax.set_zlabel('Z координата')
+    ax.legend()
+    plt.show()
 # Пример использования функции
 # sensor_locs = [(10, 20, 30), (20, 30, 40), (30, 40, 50)]
 # real_hypo = (15, 25, 35)

@@ -10,6 +10,7 @@ import numpy as  np
 import jhd
 #import square_compute
 
+
 class Problem:
     def __init__(self, locations, velocities, observed_times, real_hypocenter_location):
         self.locations = locations
@@ -194,7 +195,8 @@ def create_real_cords_from_event_date_list(event_date_list):
 # stations, num_stations=create_stations_and_num_stations('Antonovskaya_gauges.txt')
 # equations=jhd.create_equations_type_3(OTl,ie,num_events,num_stations,stations)
 # DeltaX,DeltaS=jhd.solve_joint_hypocenter(equations,num_events,num_stations)
-# focal_param=jhd.get_focal_parameters(DeltaX,num_events)
+# print(DeltaX,DeltaS,len(DeltaS))
+# # focal_param=jhd.get_focal_parameters(DeltaX,num_events)
 # jhd.print_focal_parameters(focal_param)
 # calc_cords=jhd.get_coordinates_without_time(focal_param)
 # jhd.compare_real_and_computed(real_cords,calc_cords)

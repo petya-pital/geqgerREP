@@ -1,7 +1,7 @@
 import numpy as np
 import jhd as hd
 import solve_hypocentr as  sc
-def generate_synthetic_data(num_earthquakes, num_stations, true_hypocenters, stations, velocity_model):
+def generate_synthetic_data(num_earthquakes, num_stations, true_hypocenters, stations,):
     times = np.zeros((num_earthquakes, num_stations))
     for i in range(num_earthquakes):
         for j in range(num_stations):
@@ -11,7 +11,7 @@ def generate_synthetic_data(num_earthquakes, num_stations, true_hypocenters, sta
     return times
 
 
-def jhd(num_earthquakes, num_stations, initial_hypocenters, observed_times, stations, velocity_model, iterations=10):
+def jhd(num_earthquakes, num_stations, initial_hypocenters, observed_times, stations, iterations=10):
     hypocenters = initial_hypocenters.copy()
     for _ in range(iterations):
         A = []

@@ -10,6 +10,7 @@ def generate_synthetic_data(num_earthquakes, num_stations, true_hypocenters, sta
             times[i, j] = travel_time + true_hypocenters[i, 3]
     return times
 
+
 def jhd(num_earthquakes, num_stations, initial_hypocenters, observed_times, stations, velocity_model, iterations=10):
     hypocenters = np.array(initial_hypocenters, dtype=float)  # Преобразование к массиву NumPy
     observed_times = np.array(observed_times, dtype=float)    # Преобразование к массиву NumPy
@@ -30,12 +31,13 @@ def jhd(num_earthquakes, num_stations, initial_hypocenters, observed_times, stat
         A = np.array(A)
         b = np.array(b)
 
-        if A.shape[0] < 4 * num_earthquakes:
-            print(f"Insufficient data to solve for all hypocenters. A.shape: {A.shape}, expected: {4 * num_earthquakes}")
-            break
+        # Вывод количества строк в A и b
+        print(f"Iteration {iteration}: Number of rows in A: {A.shape[0]}, Number of rows in b: {b.shape[0]}")
 
+        # Решение системы уравнений
         delta_hypocenters, _, _, _ = np.linalg.lstsq(A, b, rcond=None)
 
+        # Вывод информации о размере delta_hypocenters
         print(f"Iteration {iteration}: delta_hypocenters size: {delta_hypocenters.size}, expected: {4 * num_earthquakes}")
 
         if delta_hypocenters.size == 4 * num_earthquakes:
@@ -50,14 +52,16 @@ def jhd(num_earthquakes, num_stations, initial_hypocenters, observed_times, stat
 
 # Загрузка данных
 stations = np.array(sc.create_location('Antonovskaya_gauges.txt'))
+print(stations)
 num_stations = len(stations)
 velocity_model = 3000
 
 events_date_list = sc.create_list_event_date_from_exel('Antonovskaya_joint_test.xlsx')
 observed_times, num_events = sc.create_observed_times_list_and_num_events(events_date_list)
 true_hypocenters = np.array(sc.create_real_cords_from_event_date_list(events_date_list))
+print(observed_times)
 initial_hypocenters = np.array(sc.create_initial_estimates(num_events))
-
+print(initial_hypocenters)
 # Выполнение JHD
 estimated_hypocenters = jhd(num_events, num_stations, initial_hypocenters, observed_times, stations, velocity_model)
 

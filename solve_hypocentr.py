@@ -185,14 +185,15 @@ def create_real_cords_from_event_date_list(event_date_list):
     return real_cords
 
 #
-# edl=create_list_event_date_from_exel('Antonovskaya_joint_test.xlsx')
-# real_cords=create_real_cords_from_event_date_list(edl)
-# OTl, num_events=create_observed_times_list_and_num_events(edl)
-# # print(OTl)
-# # print(num_events)
-# ie=create_initial_estimates(num_events)
-# # print(ie)
-# stations, num_stations=create_stations_and_num_stations('Antonovskaya_gauges.txt')
+edl=create_list_event_date_from_exel('Antonovskaya_joint_test.xlsx')
+real_cords=create_real_cords_from_event_date_list(edl)
+OTl, num_events=create_observed_times_list_and_num_events(edl)
+print(OTl)
+# print(num_events)
+ie=create_initial_estimates(num_events)
+# print(ie)
+stations, num_stations=create_stations_and_num_stations('Antonovskaya_gauges.txt')
+print(stations)
 # equations=jhd.create_equations_type_3(OTl,ie,num_events,num_stations,stations)
 # DeltaX,DeltaS=jhd.solve_joint_hypocenter(equations,num_events,num_stations)
 # print(DeltaX,DeltaS,len(DeltaS))
